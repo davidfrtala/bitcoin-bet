@@ -1,4 +1,11 @@
-import { Stack, StackProps, RemovalPolicy, Duration } from "aws-cdk-lib";
+import {
+  SecretValue,
+  CfnOutput,
+  Stack,
+  StackProps,
+  RemovalPolicy,
+  Duration,
+} from "aws-cdk-lib";
 import {
   AppsyncFunction,
   AuthorizationType,
@@ -21,6 +28,10 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as kinesis from "aws-cdk-lib/aws-kinesis";
 import { KinesisEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as events from "aws-cdk-lib/aws-events";
 import path = require("path");
 
 export class BitcoinBetStack extends Stack {
@@ -45,6 +56,12 @@ export class BitcoinBetStack extends Stack {
       environment: {
         PLAYER_TABLE_NAME: playerTable.tableName,
       },
+    });
+
+    // Create state machine
+    const resolveStack = new sfn.StateMachine(this, "ResolveStateMachine", {
+      definitionBody: this.getWorkflowDefinition(),
+      timeout: Duration.minutes(2),
     });
 
     // Grant the Lambda function write permissions to the Player table
@@ -113,7 +130,7 @@ export class BitcoinBetStack extends Stack {
       ),
       environment: {
         BETS_TABLE_NAME: betsTable.tableName,
-        COIN_TOSS_STATE_MACHINE_ARN: "soon",
+        RESOLVE_STATE_MACHINE_ARN: resolveStack.stateMachineArn,
       },
     });
 
@@ -125,7 +142,7 @@ export class BitcoinBetStack extends Stack {
       })
     );
 
-    betsTable.grantWriteData(processBetsLambda);
+    betsTable.grantReadWriteData(processBetsLambda);
 
     // Grant the Lambda function permissions to put records into the Kinesis stream
     betStream.grantWrite(ingestBetLambda);
@@ -259,5 +276,43 @@ export class BitcoinBetStack extends Stack {
       ),
       pipelineConfig: [getPlayerResolver],
     });
+  }
+
+  private getWorkflowDefinition() {
+    const waitX = new sfn.Wait(this, `Wait X Seconds`, {
+      time: sfn.WaitTime.secondsPath("$.wait"),
+    });
+
+    const connection = new events.Connection(this, "BtcApiConnection", {
+      description: "Connection to BTC Price API",
+      authorization: events.Authorization.basic(
+        "username",
+        SecretValue.unsafePlainText("password")
+      ),
+    });
+
+    const btcPriceFetch = (name: string, resultPath: string) =>
+      new tasks.HttpInvoke(this, name, {
+        connection,
+        apiRoot: "https://api.binance.com",
+        apiEndpoint: sfn.TaskInput.fromText("api/v3/ticker/price"),
+        queryStringParameters: sfn.TaskInput.fromObject({
+          symbol: "BTCUSDT",
+        }),
+        method: sfn.TaskInput.fromText("GET"),
+        resultPath,
+        resultSelector: {
+          "value.$": "$.ResponseBody.price",
+        },
+      });
+
+    const definition = sfn.Chain.start(
+      btcPriceFetch("Fetch BTC Price Start", "$.btcPriceStart")
+        .next(waitX)
+        .next(btcPriceFetch("Fetch BTC Price End", "$.btcPriceEnd"))
+        .next(new sfn.Succeed(this, "Succeed"))
+    );
+
+    return sfn.DefinitionBody.fromChainable(definition);
   }
 }

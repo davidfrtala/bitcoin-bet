@@ -8,7 +8,7 @@ exports.handler = async (event) => {
   const bet = {
     userId: identity.sub,
     currentGuess: input.guess,
-    timestamp: new Date().toISOString(),
+    timestamp: Date.now(),
   };
 
   // Create a command to put the bet data into the Kinesis stream
@@ -19,8 +19,8 @@ exports.handler = async (event) => {
   });
 
   try {
+    console.info("Putting record to Kinesis:", bet);
     await kinesisClient.send(command);
-    return "Bet placed successfully";
   } catch (error) {
     console.error("Error putting record to Kinesis:", error);
     throw new Error("Failed to place bet");
