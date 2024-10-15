@@ -1,9 +1,6 @@
 {
   "name": "bitcoin-bet",
   "version": "0.1.0",
-  "bin": {
-    "cdk-bitcoin-bet": "bin/cdk-bitcoin-bet.js"
-  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",

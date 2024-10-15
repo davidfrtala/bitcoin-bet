@@ -3,8 +3,8 @@ export const request = (ctx) => {
   const identity = ctx.identity;
 
   return {
-    operation: "Invoke",
-    invocationType: "Event",
+    operation: 'Invoke',
+    invocationType: 'Event',
     payload: {
       input,
       identity,
@@ -12,4 +12,4 @@ export const request = (ctx) => {
   };
 };
 
-export const response = () => "Bet placed successfully";
+export const response = () => 'Bet placed successfully';

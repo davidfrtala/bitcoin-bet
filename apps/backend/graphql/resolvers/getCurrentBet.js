@@ -1,7 +1,9 @@
+import { util } from '@aws-appsync/utils';
+
 export const request = (ctx) => {
   const identity = ctx.identity;
   return {
-    operation: "GetItem",
+    operation: 'GetItem',
     key: util.dynamodb.toMapValues({ userId: identity.sub }),
   };
 };

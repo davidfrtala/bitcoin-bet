@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/backend",
+  "projectType": "application",
+  "targets": {
+    "cdk": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cdk",
+        "cwd": "apps/backend"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cdk deploy",
+        "cwd": "apps/backend"
+      }
+    },
+    "destroy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cdk destroy",
+        "cwd": "apps/backend"
+      }
+    }
+  },
+  "tags": ["aws"]
+}
