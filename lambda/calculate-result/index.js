@@ -4,8 +4,8 @@ exports.handler = async (event) => {
 
   const startPrice = parseFloat(btcPriceStart.value);
   const endPrice = parseFloat(btcPriceEnd.value);
-  const priceDiff =
-    Math.round((endPrice - startPrice + Number.EPSILON) * 100) / 100;
+  const score = parseInt(player.score);
+  const priceDiff = (endPrice - startPrice).toFixed(2);
 
   let result;
   if (
@@ -17,11 +17,11 @@ exports.handler = async (event) => {
     result = "LOSS";
   }
 
-  const newScore = result === "WIN" ? player.score++ : player.score--;
+  const scoreChange = score + (result === "WIN" ? 1 : -1);
 
   return {
     result,
     priceDiff,
-    newScore,
+    newScore: scoreChange.toString(),
   };
 };

@@ -375,7 +375,11 @@ export class BitcoinBetStack extends Stack {
           sfn.JsonPath.stringAt("$.userId")
         ),
       },
-      updateExpression: "SET startPrice = :startPrice, endPrice = :endPrice",
+      updateExpression:
+        "SET startPrice = :startPrice, endPrice = :endPrice, priceDiff = :priceDiff, #res = :result",
+      expressionAttributeNames: {
+        "#res": "result",
+      },
       expressionAttributeValues: {
         ":startPrice": tasks.DynamoAttributeValue.fromNumber(
           sfn.JsonPath.numberAt("$.btcPriceStart.value")
@@ -383,12 +387,12 @@ export class BitcoinBetStack extends Stack {
         ":endPrice": tasks.DynamoAttributeValue.fromNumber(
           sfn.JsonPath.numberAt("$.btcPriceEnd.value")
         ),
-        // ":priceDiff": tasks.DynamoAttributeValue.fromNumber(
-        //   sfn.JsonPath.numberAt("$.calculationResult.priceDiff")
-        // ),
-        // ":result": tasks.DynamoAttributeValue.fromString(
-        //   sfn.JsonPath.stringAt("$.calculationResult.result")
-        // ),
+        ":priceDiff": tasks.DynamoAttributeValue.fromNumber(
+          sfn.JsonPath.numberAt("$.calculationResult.priceDiff")
+        ),
+        ":result": tasks.DynamoAttributeValue.fromString(
+          sfn.JsonPath.stringAt("$.calculationResult.result")
+        ),
       },
       resultPath: sfn.JsonPath.DISCARD,
     });
