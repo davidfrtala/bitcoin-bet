@@ -1,6 +1,6 @@
 exports.handler = async (event) => {
   const { player, userBet, btcPriceStart, btcPriceEnd } = event;
-  const { currentGuess } = userBet.item;
+  const { guess } = userBet.item;
 
   const startPrice = parseFloat(btcPriceStart.value);
   const endPrice = parseFloat(btcPriceEnd.value);
@@ -9,8 +9,8 @@ exports.handler = async (event) => {
 
   let result;
   if (
-    (currentGuess === "UP" && priceDiff > 0) ||
-    (currentGuess === "DOWN" && priceDiff < 0)
+    (guess === "UP" && priceDiff > 0) ||
+    (guess === "DOWN" && priceDiff < 0)
   ) {
     result = "WIN";
   } else {

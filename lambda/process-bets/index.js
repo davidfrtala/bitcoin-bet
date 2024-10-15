@@ -18,7 +18,7 @@ exports.handler = async (event) => {
     const payload = JSON.parse(
       Buffer.from(record.kinesis.data, "base64").toString("ascii")
     );
-    const { userId, guess: currentGuess, timestamp, waitTime } = payload;
+    const { userId, guess, timestamp, waitTime } = payload;
 
     try {
       // Check if there's an existing bet for the user
@@ -31,7 +31,7 @@ exports.handler = async (event) => {
 
       // If a bet exists, check its timestamp
       if (existingBet.Item) {
-        const timeSinceLastBet = timestamp - existingBet.Item.lastBetTimestamp;
+        const timeSinceLastBet = timestamp - existingBet.Item.betTimestamp;
         if (timeSinceLastBet < waitTime * 1000) {
           console.warn(
             `Bet for user ${userId} filtered out due to ${waitTime}-second rule`
@@ -46,8 +46,8 @@ exports.handler = async (event) => {
           TableName,
           Item: {
             userId,
-            currentGuess,
-            lastBetTimestamp: timestamp,
+            guess,
+            betTimestamp: timestamp,
           },
         })
       );
@@ -64,7 +64,7 @@ exports.handler = async (event) => {
       stateMachineArn: process.env.RESOLVE_STATE_MACHINE_ARN,
       input: JSON.stringify({
         userId,
-        currentGuess,
+        guess,
         wait: waitTime || 10, // Default to 10 seconds if waitTime is not provided
       }),
     });

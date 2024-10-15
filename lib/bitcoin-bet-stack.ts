@@ -214,16 +214,6 @@ export class BitcoinBetStack extends Stack {
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    const listBetsResolver = new AppsyncFunction(this, "ListBetsFunction", {
-      name: "listBets",
-      api,
-      dataSource: betsDataSource,
-      code: Code.fromAsset(
-        path.join(__dirname, "../graphql/resolvers/listBets.js")
-      ),
-      runtime: FunctionRuntime.JS_1_0_0,
-    });
-
     new Resolver(this, "PipelineResolverCurrentBet", {
       api,
       typeName: "Query",
@@ -233,17 +223,6 @@ export class BitcoinBetStack extends Stack {
         path.join(__dirname, "../graphql/resolvers/pipeline.js")
       ),
       pipelineConfig: [currentBetResolver],
-    });
-
-    new Resolver(this, "PipelineResolverListBets", {
-      api,
-      typeName: "Query",
-      fieldName: "listBets",
-      runtime: FunctionRuntime.JS_1_0_0,
-      code: Code.fromAsset(
-        path.join(__dirname, "../graphql/resolvers/pipeline.js")
-      ),
-      pipelineConfig: [listBetsResolver],
     });
 
     const placeBetResolver = new AppsyncFunction(this, "PlaceBetFunction", {
@@ -418,10 +397,10 @@ export class BitcoinBetStack extends Stack {
     );
 
     const definition = sfn.Chain.start(
-      readBet
-        .next(btcPriceFetch("Fetch BTC Price Start", "$.btcPriceStart"))
+      btcPriceFetch("Fetch BTC Price Start", "$.btcPriceStart")
         .next(waitX)
         .next(btcPriceFetch("Fetch BTC Price End", "$.btcPriceEnd"))
+        .next(readBet)
         .next(readPlayerScore)
         .next(calculateResult)
         .next(updateBet)

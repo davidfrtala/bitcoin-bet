@@ -15,13 +15,13 @@ type Player {
 }
 
 type Bet {
-  currentGuess: Guess!
+  userId: String!
+  guess: Guess!
   startPrice: Float
   endPrice: Float
-  lastBetTimestamp: AWSTimestamp
-  userId: String!
   priceDiff: Float
   result: BetResult
+  betTimestamp: AWSTimestamp!
 }
 
 input PlaceBetInput {
@@ -30,9 +30,8 @@ input PlaceBetInput {
 }
 
 type Query {
+  getPlayer: Player!
   currentBet: Bet
-  listBets: [Bet]
-  getPlayer: Player
 }
 
 type Mutation {
