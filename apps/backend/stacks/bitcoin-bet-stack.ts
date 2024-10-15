@@ -102,7 +102,6 @@ export class BitcoinBetStack extends Stack {
       userPool,
       generateSecret: false,
       authFlows: {
-        adminUserPassword: true,
         userPassword: true,
         userSrp: true,
       },

@@ -1,11 +1,11 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { PutCommand } = require('@aws-sdk/lib-dynamodb');
 
 const dynamoDBClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-exports.handler = async (event) => {
-  const TableName = process.env.PLAYER_TABLE_NAME;
+const TableName = process.env.PLAYER_TABLE_NAME;
 
+exports.handler = async (event) => {
   const userId = event.request.userAttributes.sub;
   const email = event.request.userAttributes.email;
 
