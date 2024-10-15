@@ -20,6 +20,7 @@ import { Construct } from "constructs";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as kinesis from "aws-cdk-lib/aws-kinesis";
+import { KinesisEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import path = require("path");
 
 export class BitcoinBetStack extends Stack {
@@ -103,6 +104,28 @@ export class BitcoinBetStack extends Stack {
         BET_STREAM_NAME: betStream.streamName,
       },
     });
+
+    const processBetsLambda = new lambda.Function(this, "ProcessBetsLambda", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "../lambda/process-bets")
+      ),
+      environment: {
+        BETS_TABLE_NAME: betsTable.tableName,
+        COIN_TOSS_STATE_MACHINE_ARN: "soon",
+      },
+    });
+
+    // // Add Kinesis stream as an event source for the process-bets function
+    processBetsLambda.addEventSource(
+      new KinesisEventSource(betStream, {
+        startingPosition: lambda.StartingPosition.LATEST,
+        reportBatchItemFailures: true,
+      })
+    );
+
+    betsTable.grantWriteData(processBetsLambda);
 
     // Grant the Lambda function permissions to put records into the Kinesis stream
     betStream.grantWrite(ingestBetLambda);

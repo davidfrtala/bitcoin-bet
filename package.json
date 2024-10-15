@@ -20,8 +20,10 @@
     "typescript": "~5.2.2"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.9.0",
     "@aws-sdk/client-dynamodb": "^3.535.0",
     "@aws-sdk/client-kinesis": "^3.670.0",
+    "@aws-sdk/client-sfn": "^3.670.0",
     "aws-cdk-lib": "2.99.1",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
