@@ -43,7 +43,9 @@ export class BitcoinBetStack extends Stack {
       tableName: "bitcoin-players",
       partitionKey: { name: "userId", type: AttributeType.STRING },
       removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
+      billingMode: BillingMode.PROVISIONED,
+      readCapacity: 2,
+      writeCapacity: 4,
     });
 
     // Create Lambda function for post-signup
@@ -98,9 +100,8 @@ export class BitcoinBetStack extends Stack {
 
     // Create DynamoDB table
     const betsTable = new Table(this, "BetTable", {
-      partitionKey: { name: "id", type: AttributeType.STRING },
-      sortKey: { name: "lastBetTimestamp", type: AttributeType.NUMBER },
       tableName: "bitcoin-bets",
+      partitionKey: { name: "userId", type: AttributeType.STRING },
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PROVISIONED,
       readCapacity: 2,
@@ -142,6 +143,14 @@ export class BitcoinBetStack extends Stack {
       })
     );
 
+    processBetsLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: [resolveStack.stateMachineArn],
+        actions: ["states:StartExecution"],
+      })
+    );
+
     betsTable.grantReadWriteData(processBetsLambda);
 
     // Grant the Lambda function permissions to put records into the Kinesis stream
@@ -151,7 +160,6 @@ export class BitcoinBetStack extends Stack {
     betsTable.addGlobalSecondaryIndex({
       indexName: "UserIdIndex",
       partitionKey: { name: "userId", type: AttributeType.STRING },
-      sortKey: { name: "lastBetTimestamp", type: AttributeType.NUMBER },
       projectionType: ProjectionType.ALL,
     });
 

@@ -2,7 +2,7 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
   GetCommand,
-  UpdateCommand,
+  PutCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const { SFNClient, StartExecutionCommand } = require("@aws-sdk/client-sfn");
 const { Buffer } = require("node:buffer");
@@ -10,6 +10,8 @@ const { Buffer } = require("node:buffer");
 const dynamoDBClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 const sfnClient = new SFNClient({ region: process.env.AWS_REGION });
+
+const TableName = process.env.BETS_TABLE_NAME;
 
 exports.handler = async (event) => {
   for (const record of event.Records) {
@@ -19,22 +21,37 @@ exports.handler = async (event) => {
     );
     const { userId, currentGuess, timestamp } = payload;
 
-    // Retrieve user bets from DynamoDB
-    const params = {
-      TableName: process.env.BETS_TABLE_NAME,
-      Key: {
-        userId,
-      },
-    };
-
     try {
-      const { Item } = await docClient.send(new GetCommand(params));
-      const userProfile = Item;
+      // Check if there's an existing bet for the user
+      const existingBet = await dynamoDBClient.send(
+        new GetCommand({
+          TableName,
+          Key: { userId },
+        })
+      );
 
-      if (!userProfile) {
-        console.warn(`User profile not found for userId: ${userId}`);
-        return;
+      // If a bet exists, check its timestamp
+      if (existingBet.Item) {
+        const timeSinceLastBet = timestamp - existingBet.Item.lastBetTimestamp;
+        if (timeSinceLastBet < 30000) {
+          console.warn(
+            `Bet for user ${userId} filtered out due to 30-second rule`
+          );
+          continue;
+        }
       }
+
+      // Store the new bet
+      await dynamoDBClient.send(
+        new PutCommand({
+          TableName,
+          Item: {
+            userId,
+            currentGuess,
+            lastBetTimestamp: timestamp,
+          },
+        })
+      );
     } catch (error) {
       console.error(
         `Error retrieving user profile for userId ${userId}:`,
@@ -43,43 +60,10 @@ exports.handler = async (event) => {
       throw error;
     }
 
-    const lastBetTimestamp =
-      userProfile.data.getUserProfile?.lastBetTimestamp || 0;
-
-    // Check if user has placed a bet in the last 30 seconds
-    if (timestamp - lastBetTimestamp < 30000) {
-      console.warn(
-        `Bet for user ${userProfileId} filtered out due to 30-second rule`
-      );
-      continue;
-    }
-    // Update user's bet information in DynamoDB
-    const updateParams = {
-      TableName: process.env.BETS_TABLE_NAME,
-      Key: { userId: userId },
-      UpdateExpression:
-        "SET currentGuess = :guess, lastBetTimestamp = :timestamp",
-      ExpressionAttributeValues: {
-        ":guess": currentGuess,
-        ":timestamp": timestamp,
-      },
-    };
-
-    try {
-      await docClient.send(new UpdateCommand(updateParams));
-      console.info(`Updated bet information for user ${userId}`);
-    } catch (error) {
-      console.error(
-        `Error updating bet information for user ${userId}:`,
-        error
-      );
-      throw error;
-    }
-
     // Prepare and start CoinToss Step Function execution
     const startExecutionCommand = new StartExecutionCommand({
       stateMachineArn: process.env.RESOLVE_STATE_MACHINE_ARN,
-      input: JSON.stringify({ userId, currentGuess, wait }),
+      input: JSON.stringify({ userId, currentGuess }),
     });
 
     try {
