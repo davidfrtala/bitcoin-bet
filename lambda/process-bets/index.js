@@ -8,7 +8,6 @@ const { SFNClient, StartExecutionCommand } = require("@aws-sdk/client-sfn");
 const { Buffer } = require("node:buffer");
 
 const dynamoDBClient = new DynamoDBClient({ region: process.env.AWS_REGION });
-const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 const sfnClient = new SFNClient({ region: process.env.AWS_REGION });
 
 const TableName = process.env.BETS_TABLE_NAME;
@@ -19,7 +18,7 @@ exports.handler = async (event) => {
     const payload = JSON.parse(
       Buffer.from(record.kinesis.data, "base64").toString("ascii")
     );
-    const { userId, currentGuess, timestamp, waitTime } = payload;
+    const { userId, guess: currentGuess, timestamp, waitTime } = payload;
 
     try {
       // Check if there's an existing bet for the user

@@ -7,8 +7,8 @@ exports.handler = async (event) => {
 
   const bet = {
     userId: identity.sub,
-    currentGuess: input.guess,
     timestamp: Date.now(),
+    ...input,
   };
 
   // Create a command to put the bet data into the Kinesis stream
