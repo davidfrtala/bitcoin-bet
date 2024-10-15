@@ -1,0 +1,37 @@
+enum Guess {
+  UP
+  DOWN
+}
+
+type Player {
+  userId: String!
+  email: String!
+  score: Int!
+}
+
+type Bet {
+  currentGuess: Guess!
+  startPrice: Float
+  endPrice: Float
+  lastBetTimestamp: AWSTimestamp
+  userId: String!
+}
+
+input PlaceBetInput {
+  guess: Guess!
+}
+
+type Query {
+  currentBet: Bet
+  listBets: [Bet]
+  getPlayer: Player
+}
+
+type Mutation {
+  placeBet(input: PlaceBetInput!): String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
