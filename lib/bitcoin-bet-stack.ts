@@ -60,10 +60,11 @@ export class BitcoinBetStack extends Stack {
 
     // Create state machine
     const resolveStack = new sfn.StateMachine(this, "ResolveStateMachine", {
-      definitionBody: this.getWorkflowDefinition({ betsTable }),
+      definitionBody: this.getWorkflowDefinition({ betsTable, playerTable }),
       timeout: Duration.minutes(2),
     });
 
+    playerTable.grantReadWriteData(resolveStack);
     betsTable.grantReadWriteData(resolveStack);
 
     // Create Lambda function for post-signup
@@ -288,9 +289,48 @@ export class BitcoinBetStack extends Stack {
     });
   }
 
-  private getWorkflowDefinition({ betsTable }: { betsTable: Table }) {
+  private getWorkflowDefinition({
+    betsTable,
+    playerTable,
+  }: {
+    betsTable: Table;
+    playerTable: Table;
+  }) {
+    const calculateResultLambda = new lambda.Function(
+      this,
+      "CalculateResultLambda",
+      {
+        runtime: lambda.Runtime.NODEJS_18_X,
+        handler: "index.handler",
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "../lambda/calculate-result")
+        ),
+      }
+    );
+
+    const connection = new events.Connection(this, "BtcApiConnection", {
+      description: "Connection to BTC Price API",
+      authorization: events.Authorization.basic(
+        "username",
+        SecretValue.unsafePlainText("password")
+      ),
+    });
+
     const waitX = new sfn.Wait(this, `Wait X Seconds`, {
       time: sfn.WaitTime.secondsPath("$.wait"),
+    });
+
+    const readPlayerScore = new tasks.DynamoGetItem(this, "Get player score", {
+      table: playerTable,
+      key: {
+        userId: tasks.DynamoAttributeValue.fromString(
+          sfn.JsonPath.stringAt("$.userId")
+        ),
+      },
+      resultSelector: {
+        "score.$": "$.Item.score.N",
+      },
+      resultPath: "$.player",
     });
 
     const readBet = new tasks.DynamoGetItem(this, "Get user bet by id", {
@@ -304,14 +344,6 @@ export class BitcoinBetStack extends Stack {
         "item.$": "$.Item",
       },
       resultPath: "$.userBet",
-    });
-
-    const connection = new events.Connection(this, "BtcApiConnection", {
-      description: "Connection to BTC Price API",
-      authorization: events.Authorization.basic(
-        "username",
-        SecretValue.unsafePlainText("password")
-      ),
     });
 
     const btcPriceFetch = (name: string, resultPath: string) =>
@@ -329,6 +361,13 @@ export class BitcoinBetStack extends Stack {
         },
       });
 
+    const calculateResult = new tasks.LambdaInvoke(this, "Calculate Result", {
+      lambdaFunction: calculateResultLambda,
+      inputPath: "$",
+      resultPath: "$.calculationResult",
+      payloadResponseOnly: true,
+    });
+
     const updateBet = new tasks.DynamoUpdateItem(this, "Update user bet", {
       table: betsTable,
       key: {
@@ -344,16 +383,45 @@ export class BitcoinBetStack extends Stack {
         ":endPrice": tasks.DynamoAttributeValue.fromNumber(
           sfn.JsonPath.numberAt("$.btcPriceEnd.value")
         ),
+        // ":priceDiff": tasks.DynamoAttributeValue.fromNumber(
+        //   sfn.JsonPath.numberAt("$.calculationResult.priceDiff")
+        // ),
+        // ":result": tasks.DynamoAttributeValue.fromString(
+        //   sfn.JsonPath.stringAt("$.calculationResult.result")
+        // ),
       },
       resultPath: sfn.JsonPath.DISCARD,
     });
+
+    const updatePlayerScore = new tasks.DynamoUpdateItem(
+      this,
+      "Update player score",
+      {
+        table: playerTable,
+        key: {
+          userId: tasks.DynamoAttributeValue.fromString(
+            sfn.JsonPath.stringAt("$.userId")
+          ),
+        },
+        updateExpression: "SET score = :score",
+        expressionAttributeValues: {
+          ":score": tasks.DynamoAttributeValue.fromNumber(
+            sfn.JsonPath.numberAt("$.calculationResult.newScore")
+          ),
+        },
+        resultPath: sfn.JsonPath.DISCARD,
+      }
+    );
 
     const definition = sfn.Chain.start(
       readBet
         .next(btcPriceFetch("Fetch BTC Price Start", "$.btcPriceStart"))
         .next(waitX)
         .next(btcPriceFetch("Fetch BTC Price End", "$.btcPriceEnd"))
+        .next(readPlayerScore)
+        .next(calculateResult)
         .next(updateBet)
+        .next(updatePlayerScore)
         .next(new sfn.Succeed(this, "Succeed"))
     );
 

@@ -3,6 +3,11 @@ enum Guess {
   DOWN
 }
 
+enum BetResult {
+  WIN
+  LOSS
+}
+
 type Player {
   userId: String!
   email: String!
@@ -15,6 +20,8 @@ type Bet {
   endPrice: Float
   lastBetTimestamp: AWSTimestamp
   userId: String!
+  priceDiff: Float
+  result: BetResult
 }
 
 input PlaceBetInput {
