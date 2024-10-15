@@ -48,6 +48,24 @@ export class BitcoinBetStack extends Stack {
       writeCapacity: 4,
     });
 
+    // Create DynamoDB table
+    const betsTable = new Table(this, "BetTable", {
+      tableName: "bitcoin-bets",
+      partitionKey: { name: "userId", type: AttributeType.STRING },
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PROVISIONED,
+      readCapacity: 2,
+      writeCapacity: 4,
+    });
+
+    // Create state machine
+    const resolveStack = new sfn.StateMachine(this, "ResolveStateMachine", {
+      definitionBody: this.getWorkflowDefinition({ betsTable }),
+      timeout: Duration.minutes(2),
+    });
+
+    betsTable.grantReadWriteData(resolveStack);
+
     // Create Lambda function for post-signup
     const postSignupLambda = new lambda.Function(this, "PostSignupLambda", {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -58,12 +76,6 @@ export class BitcoinBetStack extends Stack {
       environment: {
         PLAYER_TABLE_NAME: playerTable.tableName,
       },
-    });
-
-    // Create state machine
-    const resolveStack = new sfn.StateMachine(this, "ResolveStateMachine", {
-      definitionBody: this.getWorkflowDefinition(),
-      timeout: Duration.minutes(2),
     });
 
     // Grant the Lambda function write permissions to the Player table
@@ -96,16 +108,6 @@ export class BitcoinBetStack extends Stack {
         userPassword: true,
         userSrp: true,
       },
-    });
-
-    // Create DynamoDB table
-    const betsTable = new Table(this, "BetTable", {
-      tableName: "bitcoin-bets",
-      partitionKey: { name: "userId", type: AttributeType.STRING },
-      removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PROVISIONED,
-      readCapacity: 2,
-      writeCapacity: 4,
     });
 
     // Create Kinesis stream for bet placement
@@ -286,9 +288,22 @@ export class BitcoinBetStack extends Stack {
     });
   }
 
-  private getWorkflowDefinition() {
+  private getWorkflowDefinition({ betsTable }: { betsTable: Table }) {
     const waitX = new sfn.Wait(this, `Wait X Seconds`, {
       time: sfn.WaitTime.secondsPath("$.wait"),
+    });
+
+    const readBet = new tasks.DynamoGetItem(this, "Get user bet by id", {
+      table: betsTable,
+      key: {
+        userId: tasks.DynamoAttributeValue.fromString(
+          sfn.JsonPath.stringAt("$.userId")
+        ),
+      },
+      resultSelector: {
+        "item.$": "$.Item",
+      },
+      resultPath: "$.userBet",
     });
 
     const connection = new events.Connection(this, "BtcApiConnection", {
@@ -314,10 +329,31 @@ export class BitcoinBetStack extends Stack {
         },
       });
 
+    const updateBet = new tasks.DynamoUpdateItem(this, "Update user bet", {
+      table: betsTable,
+      key: {
+        userId: tasks.DynamoAttributeValue.fromString(
+          sfn.JsonPath.stringAt("$.userId")
+        ),
+      },
+      updateExpression: "SET startPrice = :startPrice, endPrice = :endPrice",
+      expressionAttributeValues: {
+        ":startPrice": tasks.DynamoAttributeValue.fromNumber(
+          sfn.JsonPath.numberAt("$.btcPriceStart.value")
+        ),
+        ":endPrice": tasks.DynamoAttributeValue.fromNumber(
+          sfn.JsonPath.numberAt("$.btcPriceEnd.value")
+        ),
+      },
+      resultPath: sfn.JsonPath.DISCARD,
+    });
+
     const definition = sfn.Chain.start(
-      btcPriceFetch("Fetch BTC Price Start", "$.btcPriceStart")
+      readBet
+        .next(btcPriceFetch("Fetch BTC Price Start", "$.btcPriceStart"))
         .next(waitX)
         .next(btcPriceFetch("Fetch BTC Price End", "$.btcPriceEnd"))
+        .next(updateBet)
         .next(new sfn.Succeed(this, "Succeed"))
     );
 
