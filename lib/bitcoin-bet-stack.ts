@@ -92,6 +92,15 @@ export class BitcoinBetStack extends Stack {
       writeCapacity: 4,
     });
 
+    const ingestBetLambda = new lambda.Function(this, "IngestBetLambda", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "../lambda/ingest-bet")),
+      environment: {
+        BET_TABLE_NAME: betsTable.tableName,
+      },
+    });
+
     // Add GSI for userId
     betsTable.addGlobalSecondaryIndex({
       indexName: "UserIdIndex",
@@ -100,15 +109,6 @@ export class BitcoinBetStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
-    // Pass both tables to createGraphqlApi method
-    this.createGraphqlApi(betsTable, playerTable, userPool);
-  }
-
-  private createGraphqlApi(
-    betsTable: Table,
-    playerTable: Table,
-    userPool: cognito.UserPool
-  ): void {
     const api = new GraphqlApi(this, "BetsApi", {
       name: "betsAPI",
       definition: Definition.fromFile(
@@ -142,16 +142,11 @@ export class BitcoinBetStack extends Stack {
       "PlayerDataSource",
       playerTable
     );
+    const ingestBetDataSource = api.addLambdaDataSource(
+      "IngestBetDataSource",
+      ingestBetLambda
+    );
 
-    // Create and configure resolvers
-    this.createResolvers(api, betsDataSource, playerDataSource);
-  }
-
-  private createResolvers(
-    api: GraphqlApi,
-    betsDataSource: any,
-    playerDataSource: any
-  ): void {
     const currentBetResolver = new AppsyncFunction(this, "CurrentBetFunction", {
       name: "getCurrentBet",
       api,
@@ -197,7 +192,7 @@ export class BitcoinBetStack extends Stack {
     const placeBetResolver = new AppsyncFunction(this, "PlaceBetFunction", {
       name: "placeBet",
       api,
-      dataSource: betsDataSource,
+      dataSource: ingestBetDataSource,
       code: Code.fromAsset(
         path.join(__dirname, "../graphql/resolvers/placeBet.js")
       ),
