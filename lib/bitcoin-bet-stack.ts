@@ -1,4 +1,4 @@
-import { Stack, StackProps, RemovalPolicy } from "aws-cdk-lib";
+import { Stack, StackProps, RemovalPolicy, Duration } from "aws-cdk-lib";
 import {
   AppsyncFunction,
   AuthorizationType,
@@ -19,6 +19,7 @@ import {
 import { Construct } from "constructs";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as kinesis from "aws-cdk-lib/aws-kinesis";
 import path = require("path");
 
 export class BitcoinBetStack extends Stack {
@@ -67,19 +68,15 @@ export class BitcoinBetStack extends Stack {
     });
 
     // Create Cognito User Pool Client
-    const userPoolClient = new cognito.UserPoolClient(
-      this,
-      "BitcoinBetUserPoolClient",
-      {
-        userPool,
-        generateSecret: false,
-        authFlows: {
-          adminUserPassword: true,
-          userPassword: true,
-          userSrp: true,
-        },
-      }
-    );
+    new cognito.UserPoolClient(this, "BitcoinBetUserPoolClient", {
+      userPool,
+      generateSecret: false,
+      authFlows: {
+        adminUserPassword: true,
+        userPassword: true,
+        userSrp: true,
+      },
+    });
 
     // Create DynamoDB table
     const betsTable = new Table(this, "BetTable", {
@@ -92,14 +89,23 @@ export class BitcoinBetStack extends Stack {
       writeCapacity: 4,
     });
 
+    // Create Kinesis stream for bet placement
+    const betStream = new kinesis.Stream(this, "BetPlacementStream", {
+      shardCount: 1,
+      retentionPeriod: Duration.hours(24),
+    });
+
     const ingestBetLambda = new lambda.Function(this, "IngestBetLambda", {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(path.join(__dirname, "../lambda/ingest-bet")),
       environment: {
-        BET_TABLE_NAME: betsTable.tableName,
+        BET_STREAM_NAME: betStream.streamName,
       },
     });
+
+    // Grant the Lambda function permissions to put records into the Kinesis stream
+    betStream.grantWrite(ingestBetLambda);
 
     // Add GSI for userId
     betsTable.addGlobalSecondaryIndex({
