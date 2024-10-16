@@ -11,11 +11,6 @@ export function Header() {
   const isAuthenticated = authStatus === 'authenticated';
   const navigate = useNavigate();
 
-  const handleSignOut = () => {
-    signOut();
-    navigate('/');
-  };
-
   return (
     <header className="bg-gray-900 text-gray-100 p-4 flex justify-between items-center border-b border-gray-800">
       <h1 className="text-2xl font-bold">BTC Price Predictor</h1>
@@ -27,7 +22,7 @@ export function Header() {
         )}
         {isAuthenticated ? (
           <Button
-            onClick={handleSignOut}
+            onClick={() => signOut()}
             variant="outline"
             className="bg-gray-800 text-gray-100 hover:bg-gray-700 border-gray-700"
           >

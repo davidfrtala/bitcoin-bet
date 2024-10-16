@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './app/app';
+import { App } from './app/app';
 import { config } from './config';
 import { Authenticator } from '@aws-amplify/ui-react';
 
