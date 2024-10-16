@@ -1,25 +1,90 @@
-import { render } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { App } from './app';
+import { useAuthenticator, UseAuthenticator } from '@aws-amplify/ui-react';
 
-import { BrowserRouter } from 'react-router-dom';
+// Mock the useAuthenticator hook
+vi.mock('@aws-amplify/ui-react', () => ({
+  useAuthenticator: vi.fn(),
+}));
 
-import App from './app';
+// Mock the components
+vi.mock('./components/Dashboard', () => ({
+  Dashboard: () => <div data-testid="dashboard">Dashboard</div>,
+}));
+vi.mock('./components/Header', () => ({
+  Header: () => <div data-testid="header">Header</div>,
+}));
+vi.mock('./components/Layout', () => ({
+  Layout: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="layout">{children}</div>
+  ),
+  Content: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="content">{children}</div>
+  ),
+}));
+vi.mock('./components/Auth', () => ({
+  Auth: () => <div data-testid="auth">Auth</div>,
+}));
 
 describe('App', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(
-      <BrowserRouter>
+  it('renders the layout with header', () => {
+    vi.mocked(useAuthenticator).mockReturnValue({
+      authStatus: 'authenticated',
+    } as UseAuthenticator);
+
+    render(
+      <MemoryRouter>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     );
-    expect(baseElement).toBeTruthy();
+
+    expect(screen.getByTestId('layout')).toBeDefined();
+    expect(screen.getByTestId('header')).toBeDefined();
+    expect(screen.getByTestId('content')).toBeDefined();
   });
 
-  it('should have a greeting as the title', () => {
-    const { getByText } = render(
-      <BrowserRouter>
+  it('renders the dashboard when authenticated', () => {
+    vi.mocked(useAuthenticator).mockReturnValue({
+      authStatus: 'authenticated',
+    } as UseAuthenticator);
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     );
-    expect(getByText(/Welcome frontend/gi)).toBeTruthy();
+
+    expect(screen.getByTestId('dashboard')).toBeDefined();
+  });
+
+  it('renders the auth component when unauthenticated and on /auth route', () => {
+    vi.mocked(useAuthenticator).mockReturnValue({
+      authStatus: 'unauthenticated',
+    } as UseAuthenticator);
+
+    render(
+      <MemoryRouter initialEntries={['/auth']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('auth')).toBeDefined();
+  });
+
+  it('redirects to home when authenticated and on /auth route', () => {
+    vi.mocked(useAuthenticator).mockReturnValue({
+      authStatus: 'authenticated',
+    } as UseAuthenticator);
+
+    render(
+      <MemoryRouter initialEntries={['/auth']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('dashboard')).toBeDefined();
+    expect(screen.queryByTestId('auth')).toBeNull();
   });
 });

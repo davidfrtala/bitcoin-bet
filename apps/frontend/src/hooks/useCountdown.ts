@@ -11,11 +11,14 @@ export function useCountdown({
   startTime,
   waitTime,
 }: UseCountdownProps) {
-  const [countdown, setCountdown] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(() =>
+    isGuessing && startTime ? waitTime : null
+  );
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isGuessing && startTime) {
+      setCountdown(waitTime);
       interval = setInterval(() => {
         const elapsedTime = (Date.now() - startTime) / 1000;
         const remainingTime = Math.max(0, waitTime - Math.floor(elapsedTime));

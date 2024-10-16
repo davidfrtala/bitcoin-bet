@@ -15,7 +15,7 @@
     "@nx/jest": "20.0.0",
     "@nx/js": "20.0.0",
     "@nx/react": "^20.0.0",
-    "@nx/vite": "20.0.0",
+    "@nx/vite": "^20.0.0",
     "@nx/web": "20.0.0",
     "@nx/workspace": "^20.0.0",
     "@swc-node/register": "~1.9.1",
