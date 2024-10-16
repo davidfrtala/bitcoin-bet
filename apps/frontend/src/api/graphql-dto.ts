@@ -16,7 +16,7 @@ export type CurrentBet = {
   endPrice: number | null;
   guess: Guess;
   priceDiff: number | null;
-  result: boolean | null;
+  result: string | null;
   startPrice: number;
 };
 

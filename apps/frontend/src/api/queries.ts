@@ -1,4 +1,9 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  UseQueryOptions,
+  UseMutationOptions,
+} from '@tanstack/react-query';
 import { fetchData } from './api-client';
 import {
   PlayerQuery,
@@ -6,6 +11,10 @@ import {
   PlaceBetMutation,
   PlaceBetMutationVariables,
 } from './graphql-dto';
+
+type OmitOptions<T> = Omit<T, 'queryKey' | 'queryFn'>;
+
+export * from './graphql-dto';
 
 // Player Query
 const PLAYER_QUERY = `
@@ -18,8 +27,11 @@ const PLAYER_QUERY = `
   }
 `;
 
-export const usePlayerQuery = () =>
+export const usePlayerQuery = (
+  options?: OmitOptions<UseQueryOptions<PlayerQuery>>
+) =>
   useQuery<PlayerQuery>({
+    ...options,
     queryKey: ['player'],
     queryFn: () => fetchData<PlayerQuery>(PLAYER_QUERY),
   });
@@ -38,8 +50,11 @@ const CURRENT_BET_QUERY = `
   }
 `;
 
-export const useCurrentBetQuery = () =>
+export const useCurrentBetQuery = (
+  options?: OmitOptions<UseQueryOptions<CurrentBetQuery>>
+) =>
   useQuery<CurrentBetQuery>({
+    ...options,
     queryKey: ['currentBet'],
     queryFn: () => fetchData<CurrentBetQuery>(CURRENT_BET_QUERY),
   });
@@ -51,8 +66,15 @@ const PLACE_BET_MUTATION = `
   }
 `;
 
-export const usePlaceBetMutation = () =>
+export const usePlaceBetMutation = (
+  options?: UseMutationOptions<
+    PlaceBetMutation,
+    Error,
+    PlaceBetMutationVariables
+  >
+) =>
   useMutation<PlaceBetMutation, Error, PlaceBetMutationVariables>({
+    ...options,
     mutationFn: (variables) =>
       fetchData<PlaceBetMutation, PlaceBetMutationVariables>(
         PLACE_BET_MUTATION,
