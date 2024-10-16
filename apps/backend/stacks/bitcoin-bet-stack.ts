@@ -199,11 +199,11 @@ export class BitcoinBetStack extends Stack {
     );
 
     const currentBetResolver = new AppsyncFunction(this, 'CurrentBetFunction', {
-      name: 'getCurrentBet',
+      name: 'currentBet',
       api,
       dataSource: betsDataSource,
       code: Code.fromAsset(
-        join(__dirname, '../graphql/resolvers/getCurrentBet.js')
+        join(__dirname, '../graphql/resolvers/currentBet.js')
       ),
       runtime: FunctionRuntime.JS_1_0_0,
     });
@@ -234,23 +234,21 @@ export class BitcoinBetStack extends Stack {
       pipelineConfig: [placeBetResolver],
     });
 
-    const getPlayerResolver = new AppsyncFunction(this, 'GetPlayerFunction', {
-      name: 'getPlayer',
+    const playerResolver = new AppsyncFunction(this, 'PlayerFunction', {
+      name: 'player',
       api,
       dataSource: playerDataSource,
-      code: Code.fromAsset(
-        join(__dirname, '../graphql/resolvers/getPlayer.js')
-      ),
+      code: Code.fromAsset(join(__dirname, '../graphql/resolvers/player.js')),
       runtime: FunctionRuntime.JS_1_0_0,
     });
 
-    new Resolver(this, 'PipelineResolverGetPlayer', {
+    new Resolver(this, 'PipelineResolverPlayer', {
       api,
       typeName: 'Query',
-      fieldName: 'getPlayer',
+      fieldName: 'player',
       runtime: FunctionRuntime.JS_1_0_0,
       code: Code.fromAsset(join(__dirname, '../graphql/resolvers/pipeline.js')),
-      pipelineConfig: [getPlayerResolver],
+      pipelineConfig: [playerResolver],
     });
   }
 

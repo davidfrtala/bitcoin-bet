@@ -30,7 +30,7 @@ input PlaceBetInput {
 }
 
 type Query {
-  getPlayer: Player!
+  player: Player!
   currentBet: Bet
 }
 
