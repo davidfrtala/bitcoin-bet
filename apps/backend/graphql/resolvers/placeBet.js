@@ -4,7 +4,7 @@ export const request = (ctx) => {
 
   return {
     operation: 'Invoke',
-    invocationType: 'Event',
+    invocationType: 'RequestResponse',
     payload: {
       input,
       identity,

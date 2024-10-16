@@ -1,0 +1,1841 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BitcoinBetStack Snapshot stack matches snapshot 1`] = `
+{
+  "Conditions": {
+    "AwsCdkKinesisEncryptedStreamsUnsupportedRegions": {
+      "Fn::Or": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region",
+            },
+            "cn-north-1",
+          ],
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region",
+            },
+            "cn-northwest-1",
+          ],
+        },
+      ],
+    },
+  },
+  "Mappings": {
+    "LatestNodeRuntimeMap": {
+      "af-south-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-east-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-northeast-3": {
+        "value": "nodejs20.x",
+      },
+      "ap-south-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-south-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-1": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-2": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-3": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-4": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-5": {
+        "value": "nodejs20.x",
+      },
+      "ap-southeast-7": {
+        "value": "nodejs20.x",
+      },
+      "ca-central-1": {
+        "value": "nodejs20.x",
+      },
+      "ca-west-1": {
+        "value": "nodejs20.x",
+      },
+      "cn-north-1": {
+        "value": "nodejs18.x",
+      },
+      "cn-northwest-1": {
+        "value": "nodejs18.x",
+      },
+      "eu-central-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-central-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-isoe-west-1": {
+        "value": "nodejs18.x",
+      },
+      "eu-north-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-south-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-south-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-1": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-2": {
+        "value": "nodejs20.x",
+      },
+      "eu-west-3": {
+        "value": "nodejs20.x",
+      },
+      "il-central-1": {
+        "value": "nodejs20.x",
+      },
+      "me-central-1": {
+        "value": "nodejs20.x",
+      },
+      "me-south-1": {
+        "value": "nodejs20.x",
+      },
+      "mx-central-1": {
+        "value": "nodejs20.x",
+      },
+      "sa-east-1": {
+        "value": "nodejs20.x",
+      },
+      "us-east-1": {
+        "value": "nodejs20.x",
+      },
+      "us-east-2": {
+        "value": "nodejs20.x",
+      },
+      "us-gov-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-gov-west-1": {
+        "value": "nodejs18.x",
+      },
+      "us-iso-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-iso-west-1": {
+        "value": "nodejs18.x",
+      },
+      "us-isob-east-1": {
+        "value": "nodejs18.x",
+      },
+      "us-west-1": {
+        "value": "nodejs20.x",
+      },
+      "us-west-2": {
+        "value": "nodejs20.x",
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "BetPlacementStreamC4C26A35": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionPeriodHours": 24,
+        "ShardCount": 1,
+        "StreamEncryption": {
+          "Fn::If": [
+            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
+            {
+              "Ref": "AWS::NoValue",
+            },
+            {
+              "EncryptionType": "KMS",
+              "KeyId": "alias/aws/kinesis",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::Kinesis::Stream",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "BetTable29FF493E": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "userId",
+            "AttributeType": "S",
+          },
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "UserIdIndex",
+            "KeySchema": [
+              {
+                "AttributeName": "userId",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 5,
+              "WriteCapacityUnits": 5,
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "userId",
+            "KeyType": "HASH",
+          },
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 2,
+          "WriteCapacityUnits": 4,
+        },
+        "TableName": "bitcoin-bets",
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "BetsApi7ACAE15B": {
+      "Properties": {
+        "AdditionalAuthenticationProviders": [
+          {
+            "AuthenticationType": "AWS_IAM",
+          },
+        ],
+        "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
+        "LogConfig": {
+          "CloudWatchLogsRoleArn": {
+            "Fn::GetAtt": [
+              "BetsApiApiLogsRoleBBECB6F6",
+              "Arn",
+            ],
+          },
+          "FieldLogLevel": "ALL",
+        },
+        "Name": "betsAPI",
+        "UserPoolConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region",
+          },
+          "DefaultAction": "ALLOW",
+          "UserPoolId": {
+            "Ref": "BitcoinBetUserPool518B7B91",
+          },
+        },
+      },
+      "Type": "AWS::AppSync::GraphQLApi",
+    },
+    "BetsApiApiLogsRoleBBECB6F6": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSAppSyncPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BetsApiBetsDataSource42C4CF29": {
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "DynamoDBConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region",
+          },
+          "TableName": {
+            "Ref": "BetTable29FF493E",
+          },
+        },
+        "Name": "BetsDataSource",
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "BetsApiBetsDataSourceServiceRoleF01DA252",
+            "Arn",
+          ],
+        },
+        "Type": "AMAZON_DYNAMODB",
+      },
+      "Type": "AWS::AppSync::DataSource",
+    },
+    "BetsApiBetsDataSourceServiceRoleDefaultPolicy85FECA16": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BetTable29FF493E",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BetTable29FF493E",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BetsApiBetsDataSourceServiceRoleDefaultPolicy85FECA16",
+        "Roles": [
+          {
+            "Ref": "BetsApiBetsDataSourceServiceRoleF01DA252",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BetsApiBetsDataSourceServiceRoleF01DA252": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BetsApiIngestBetDataSource33C07186": {
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "LambdaConfig": {
+          "LambdaFunctionArn": {
+            "Fn::GetAtt": [
+              "IngestBetLambda7909AD56",
+              "Arn",
+            ],
+          },
+        },
+        "Name": "IngestBetDataSource",
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "BetsApiIngestBetDataSourceServiceRoleE5BCA101",
+            "Arn",
+          ],
+        },
+        "Type": "AWS_LAMBDA",
+      },
+      "Type": "AWS::AppSync::DataSource",
+    },
+    "BetsApiIngestBetDataSourceServiceRoleDefaultPolicy01F63639": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "IngestBetLambda7909AD56",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "IngestBetLambda7909AD56",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BetsApiIngestBetDataSourceServiceRoleDefaultPolicy01F63639",
+        "Roles": [
+          {
+            "Ref": "BetsApiIngestBetDataSourceServiceRoleE5BCA101",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BetsApiIngestBetDataSourceServiceRoleE5BCA101": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BetsApiLogRetentionE54BA1A3": {
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/appsync/apis/",
+              {
+                "Fn::GetAtt": [
+                  "BetsApi7ACAE15B",
+                  "ApiId",
+                ],
+              },
+            ],
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
+    },
+    "BetsApiPlayerDataSource66300380": {
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "DynamoDBConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region",
+          },
+          "TableName": {
+            "Ref": "PlayerTable61AAC965",
+          },
+        },
+        "Name": "PlayerDataSource",
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "BetsApiPlayerDataSourceServiceRoleCB807F01",
+            "Arn",
+          ],
+        },
+        "Type": "AMAZON_DYNAMODB",
+      },
+      "Type": "AWS::AppSync::DataSource",
+    },
+    "BetsApiPlayerDataSourceServiceRoleCB807F01": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BetsApiPlayerDataSourceServiceRoleDefaultPolicy46CA71BA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "PlayerTable61AAC965",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BetsApiPlayerDataSourceServiceRoleDefaultPolicy46CA71BA",
+        "Roles": [
+          {
+            "Ref": "BetsApiPlayerDataSourceServiceRoleCB807F01",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BetsApiSchema6B995678": {
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "Definition": "enum Guess {
+  UP
+  DOWN
+}
+
+enum BetResult {
+  WIN
+  LOSS
+}
+
+type Player {
+  userId: String!
+  email: String!
+  score: Int!
+}
+
+type Bet {
+  userId: String!
+  guess: Guess!
+  startPrice: Float
+  endPrice: Float
+  priceDiff: Float
+  result: BetResult
+  waitTime: Int!
+  betTimestamp: AWSTimestamp!
+}
+
+input PlaceBetInput {
+  guess: Guess!
+  waitTime: Int
+}
+
+type Query {
+  player: Player!
+  currentBet: Bet
+}
+
+type Mutation {
+  placeBet(input: PlaceBetInput!): String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+",
+      },
+      "Type": "AWS::AppSync::GraphQLSchema",
+    },
+    "BitcoinBetUserPool518B7B91": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccountRecoverySetting": {
+          "RecoveryMechanisms": [
+            {
+              "Name": "verified_email",
+              "Priority": 1,
+            },
+          ],
+        },
+        "AdminCreateUserConfig": {
+          "AllowAdminCreateUserOnly": false,
+        },
+        "AutoVerifiedAttributes": [
+          "email",
+        ],
+        "EmailVerificationMessage": "The verification code to your new account is {####}",
+        "EmailVerificationSubject": "Verify your new account",
+        "LambdaConfig": {
+          "PostConfirmation": {
+            "Fn::GetAtt": [
+              "PostSignupLambda00FF0487",
+              "Arn",
+            ],
+          },
+        },
+        "Policies": {
+          "PasswordPolicy": {
+            "MinimumLength": 6,
+          },
+        },
+        "Schema": [
+          {
+            "Mutable": true,
+            "Name": "email",
+            "Required": true,
+          },
+        ],
+        "SmsVerificationMessage": "The verification code to your new account is {####}",
+        "UsernameAttributes": [
+          "email",
+        ],
+        "VerificationMessageTemplate": {
+          "DefaultEmailOption": "CONFIRM_WITH_CODE",
+          "EmailMessage": "The verification code to your new account is {####}",
+          "EmailSubject": "Verify your new account",
+          "SmsMessage": "The verification code to your new account is {####}",
+        },
+      },
+      "Type": "AWS::Cognito::UserPool",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "BitcoinBetUserPoolClient3FA25C39": {
+      "Properties": {
+        "AllowedOAuthFlows": [
+          "implicit",
+          "code",
+        ],
+        "AllowedOAuthFlowsUserPoolClient": true,
+        "AllowedOAuthScopes": [
+          "profile",
+          "phone",
+          "email",
+          "openid",
+          "aws.cognito.signin.user.admin",
+        ],
+        "CallbackURLs": [
+          "https://example.com",
+        ],
+        "ExplicitAuthFlows": [
+          "ALLOW_USER_PASSWORD_AUTH",
+          "ALLOW_USER_SRP_AUTH",
+          "ALLOW_REFRESH_TOKEN_AUTH",
+        ],
+        "GenerateSecret": false,
+        "SupportedIdentityProviders": [
+          "COGNITO",
+        ],
+        "UserPoolId": {
+          "Ref": "BitcoinBetUserPool518B7B91",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolClient",
+    },
+    "BitcoinBetUserPoolPostConfirmationCognito209EBFD0": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostSignupLambda00FF0487",
+            "Arn",
+          ],
+        },
+        "Principal": "cognito-idp.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "BitcoinBetUserPool518B7B91",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "BtcApiConnection1144D0F7": {
+      "Properties": {
+        "AuthParameters": {
+          "BasicAuthParameters": {
+            "Password": "password",
+            "Username": "username",
+          },
+        },
+        "AuthorizationType": "BASIC",
+        "Description": "Connection to BTC Price API",
+      },
+      "Type": "AWS::Events::Connection",
+    },
+    "CalculateResultLambda2AA9C45F": {
+      "DependsOn": [
+        "CalculateResultLambdaServiceRole43411240",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "be255cebe4b5a17acf61c52bb06e1d3d484d812f7097bcb90971533e5065f8c1.zip",
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "CalculateResultLambdaServiceRole43411240",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CalculateResultLambdaServiceRole43411240": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CurrentBetFunction2FCDE62D": {
+      "DependsOn": [
+        "BetsApiBetsDataSource42C4CF29",
+        "BetsApiSchema6B995678",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "CodeS3Location": {
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/7baf9296aced3a593f13821dc2e0356c172314662d3beb7f17e726b59b0506bd.js",
+        },
+        "DataSourceName": "BetsDataSource",
+        "FunctionVersion": "2018-05-29",
+        "Name": "currentBet",
+        "Runtime": {
+          "Name": "APPSYNC_JS",
+          "RuntimeVersion": "1.0.0",
+        },
+      },
+      "Type": "AWS::AppSync::FunctionConfiguration",
+    },
+    "IngestBetLambda7909AD56": {
+      "DependsOn": [
+        "IngestBetLambdaServiceRoleDefaultPolicy7B768E9E",
+        "IngestBetLambdaServiceRoleF54BAB93",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "497e1c7a313b8013b6a1488b1f9d046d5f18d71ac1e4a449756b54ddcaca2135.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "BET_STREAM_NAME": {
+              "Ref": "BetPlacementStreamC4C26A35",
+            },
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "IngestBetLambdaServiceRoleF54BAB93",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "IngestBetLambdaServiceRoleDefaultPolicy7B768E9E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesis:ListShards",
+                "kinesis:PutRecord",
+                "kinesis:PutRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BetPlacementStreamC4C26A35",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "IngestBetLambdaServiceRoleDefaultPolicy7B768E9E",
+        "Roles": [
+          {
+            "Ref": "IngestBetLambdaServiceRoleF54BAB93",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "IngestBetLambdaServiceRoleF54BAB93": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+      "DependsOn": [
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d.zip",
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+            "Arn",
+          ],
+        },
+        "Runtime": {
+          "Fn::FindInMap": [
+            "LatestNodeRuntimeMap",
+            {
+              "Ref": "AWS::Region",
+            },
+            "value",
+          ],
+        },
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "Roles": [
+          {
+            "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "PipelineResolverCurrentBetA9095776": {
+      "DependsOn": [
+        "BetsApiSchema6B995678",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "CodeS3Location": {
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/9c4d2c2daa3d408a7dfba1c18ee837d5155063640eb9ed594a0ce74093e00160.js",
+        },
+        "FieldName": "currentBet",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "CurrentBetFunction2FCDE62D",
+                "FunctionId",
+              ],
+            },
+          ],
+        },
+        "Runtime": {
+          "Name": "APPSYNC_JS",
+          "RuntimeVersion": "1.0.0",
+        },
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "PipelineResolverPlaceBet8BB9D400": {
+      "DependsOn": [
+        "BetsApiSchema6B995678",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "CodeS3Location": {
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/9c4d2c2daa3d408a7dfba1c18ee837d5155063640eb9ed594a0ce74093e00160.js",
+        },
+        "FieldName": "placeBet",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "PlaceBetFunction2264438F",
+                "FunctionId",
+              ],
+            },
+          ],
+        },
+        "Runtime": {
+          "Name": "APPSYNC_JS",
+          "RuntimeVersion": "1.0.0",
+        },
+        "TypeName": "Mutation",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "PipelineResolverPlayer180FEB38": {
+      "DependsOn": [
+        "BetsApiSchema6B995678",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "CodeS3Location": {
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/9c4d2c2daa3d408a7dfba1c18ee837d5155063640eb9ed594a0ce74093e00160.js",
+        },
+        "FieldName": "player",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "PlayerFunction56A63A32",
+                "FunctionId",
+              ],
+            },
+          ],
+        },
+        "Runtime": {
+          "Name": "APPSYNC_JS",
+          "RuntimeVersion": "1.0.0",
+        },
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "PlaceBetFunction2264438F": {
+      "DependsOn": [
+        "BetsApiIngestBetDataSource33C07186",
+        "BetsApiSchema6B995678",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "CodeS3Location": {
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/0984bc05992a9feec34dd2704ddbc2f11a12049189e16cad99fc5f3182d96eed.js",
+        },
+        "DataSourceName": "IngestBetDataSource",
+        "FunctionVersion": "2018-05-29",
+        "Name": "placeBet",
+        "Runtime": {
+          "Name": "APPSYNC_JS",
+          "RuntimeVersion": "1.0.0",
+        },
+      },
+      "Type": "AWS::AppSync::FunctionConfiguration",
+    },
+    "PlayerFunction56A63A32": {
+      "DependsOn": [
+        "BetsApiPlayerDataSource66300380",
+        "BetsApiSchema6B995678",
+      ],
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "BetsApi7ACAE15B",
+            "ApiId",
+          ],
+        },
+        "CodeS3Location": {
+          "Fn::Sub": "s3://cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}/04c77ee92d7dc53b3d27574ba8f04f01d75978473e9c604cb206f8d8590c8501.js",
+        },
+        "DataSourceName": "PlayerDataSource",
+        "FunctionVersion": "2018-05-29",
+        "Name": "player",
+        "Runtime": {
+          "Name": "APPSYNC_JS",
+          "RuntimeVersion": "1.0.0",
+        },
+      },
+      "Type": "AWS::AppSync::FunctionConfiguration",
+    },
+    "PlayerTable61AAC965": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "userId",
+            "AttributeType": "S",
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "userId",
+            "KeyType": "HASH",
+          },
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 2,
+          "WriteCapacityUnits": 4,
+        },
+        "TableName": "bitcoin-players",
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "PostSignupLambda00FF0487": {
+      "DependsOn": [
+        "PostSignupLambdaServiceRoleDefaultPolicy6E7FB51F",
+        "PostSignupLambdaServiceRole000498CA",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "8a658702477da5391b683cbb06b54e904a0fe433b5cadf5006f0a6cc1261f373.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "PLAYER_TABLE_NAME": {
+              "Ref": "PlayerTable61AAC965",
+            },
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "PostSignupLambdaServiceRole000498CA",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "PostSignupLambdaServiceRole000498CA": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "PostSignupLambdaServiceRoleDefaultPolicy6E7FB51F": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "PlayerTable61AAC965",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PostSignupLambdaServiceRoleDefaultPolicy6E7FB51F",
+        "Roles": [
+          {
+            "Ref": "PostSignupLambdaServiceRole000498CA",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ProcessBetsLambda45918B21": {
+      "DependsOn": [
+        "ProcessBetsLambdaServiceRoleDefaultPolicy9679821C",
+        "ProcessBetsLambdaServiceRole2E22A32B",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "fe35e8f1f8894e0545b19c2ba817a0db2b446259a25ef80902379edf5b3141d3.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "BETS_TABLE_NAME": {
+              "Ref": "BetTable29FF493E",
+            },
+            "RESOLVE_STATE_MACHINE_ARN": {
+              "Ref": "ResolveStateMachine79471630",
+            },
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "ProcessBetsLambdaServiceRole2E22A32B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "ProcessBetsLambdaKinesisEventSourceTestStackBetPlacementStreamECCF565E94AD24C6": {
+      "Properties": {
+        "BatchSize": 100,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "BetPlacementStreamC4C26A35",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "ProcessBetsLambda45918B21",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "StartingPosition": "LATEST",
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "ProcessBetsLambdaServiceRole2E22A32B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ProcessBetsLambdaServiceRoleDefaultPolicy9679821C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesis:DescribeStreamSummary",
+                "kinesis:GetRecords",
+                "kinesis:GetShardIterator",
+                "kinesis:ListShards",
+                "kinesis:SubscribeToShard",
+                "kinesis:DescribeStream",
+                "kinesis:ListStreams",
+                "kinesis:DescribeStreamConsumer",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BetPlacementStreamC4C26A35",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "kinesis:DescribeStream",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BetPlacementStreamC4C26A35",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ResolveStateMachine79471630",
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BetTable29FF493E",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BetTable29FF493E",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ProcessBetsLambdaServiceRoleDefaultPolicy9679821C",
+        "Roles": [
+          {
+            "Ref": "ProcessBetsLambdaServiceRole2E22A32B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ResolveStateMachine79471630": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "ResolveStateMachineRoleDefaultPolicyDD6B4FD5",
+        "ResolveStateMachineRoleB92C221E",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"Fetch BTC Price Start","States":{"Fetch BTC Price Start":{"Next":"Wait X Seconds","Type":"Task","ResultPath":"$.btcPriceStart","ResultSelector":{"value.$":"$.ResponseBody.price"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::http:invoke","Parameters":{"ApiEndpoint":"https://api.binance.com/api/v3/ticker/price","Authentication":{"ConnectionArn":"",
+              {
+                "Fn::GetAtt": [
+                  "BtcApiConnection1144D0F7",
+                  "Arn",
+                ],
+              },
+              ""},"Method":"GET","QueryParameters":{"symbol":"BTCUSDT"}}},"Wait X Seconds":{"Type":"Wait","SecondsPath":"$.waitTime","Next":"Fetch BTC Price End"},"Fetch BTC Price End":{"Next":"Get user bet by id","Type":"Task","ResultPath":"$.btcPriceEnd","ResultSelector":{"value.$":"$.ResponseBody.price"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::http:invoke","Parameters":{"ApiEndpoint":"https://api.binance.com/api/v3/ticker/price","Authentication":{"ConnectionArn":"",
+              {
+                "Fn::GetAtt": [
+                  "BtcApiConnection1144D0F7",
+                  "Arn",
+                ],
+              },
+              ""},"Method":"GET","QueryParameters":{"symbol":"BTCUSDT"}}},"Get user bet by id":{"Next":"Get player score","Type":"Task","ResultPath":"$.userBet","ResultSelector":{"item.$":"$.Item"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::dynamodb:getItem","Parameters":{"Key":{"userId":{"S.$":"$.userId"}},"TableName":"",
+              {
+                "Ref": "BetTable29FF493E",
+              },
+              "","ConsistentRead":false}},"Get player score":{"Next":"Calculate Result","Type":"Task","ResultPath":"$.player","ResultSelector":{"score.$":"$.Item.score.N"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::dynamodb:getItem","Parameters":{"Key":{"userId":{"S.$":"$.userId"}},"TableName":"",
+              {
+                "Ref": "PlayerTable61AAC965",
+              },
+              "","ConsistentRead":false}},"Calculate Result":{"Next":"Update user bet","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$","ResultPath":"$.calculationResult","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CalculateResultLambda2AA9C45F",
+                  "Arn",
+                ],
+              },
+              ""},"Update user bet":{"Next":"Update player score","Type":"Task","ResultPath":null,"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::dynamodb:updateItem","Parameters":{"Key":{"userId":{"S.$":"$.userId"}},"TableName":"",
+              {
+                "Ref": "BetTable29FF493E",
+              },
+              "","ExpressionAttributeNames":{"#res":"result"},"ExpressionAttributeValues":{":startPrice":{"N.$":"$.btcPriceStart.value"},":endPrice":{"N.$":"$.btcPriceEnd.value"},":priceDiff":{"N.$":"$.calculationResult.priceDiff"},":result":{"S.$":"$.calculationResult.result"}},"UpdateExpression":"SET startPrice = :startPrice, endPrice = :endPrice, priceDiff = :priceDiff, #res = :result"}},"Update player score":{"Next":"Succeed","Type":"Task","ResultPath":null,"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::dynamodb:updateItem","Parameters":{"Key":{"userId":{"S.$":"$.userId"}},"TableName":"",
+              {
+                "Ref": "PlayerTable61AAC965",
+              },
+              "","ExpressionAttributeValues":{":score":{"N.$":"$.calculationResult.newScore"}},"UpdateExpression":"SET score = :score"}},"Succeed":{"Type":"Succeed"}},"TimeoutSeconds":120}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "ResolveStateMachineRoleB92C221E",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ResolveStateMachineRoleB92C221E": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ResolveStateMachineRoleDefaultPolicyDD6B4FD5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "events:RetrieveConnectionCredentials",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BtcApiConnection1144D0F7",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BtcApiConnection1144D0F7",
+                  "SecretArn",
+                ],
+              },
+            },
+            {
+              "Action": "states:InvokeHTTPEndpoint",
+              "Condition": {
+                "StringLike": {
+                  "states:HTTPEndpoint": "https://api.binance.com*",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "dynamodb:GetItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/",
+                    {
+                      "Ref": "BetTable29FF493E",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "dynamodb:GetItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/",
+                    {
+                      "Ref": "PlayerTable61AAC965",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CalculateResultLambda2AA9C45F",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CalculateResultLambda2AA9C45F",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "dynamodb:UpdateItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/",
+                    {
+                      "Ref": "BetTable29FF493E",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "dynamodb:UpdateItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/",
+                    {
+                      "Ref": "PlayerTable61AAC965",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "PlayerTable61AAC965",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BetTable29FF493E",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BetTable29FF493E",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ResolveStateMachineRoleDefaultPolicyDD6B4FD5",
+        "Roles": [
+          {
+            "Ref": "ResolveStateMachineRoleB92C221E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

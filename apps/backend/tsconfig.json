@@ -1,5 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // ... other options ...
+    "allowJs": true,
+    "esModuleInterop": true
+  },
   "files": [],
-  "include": []  
+  "include": ["**/*.ts", "**/*.js", "lambda/**/*"],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }
