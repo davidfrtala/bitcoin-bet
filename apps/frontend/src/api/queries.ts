@@ -51,10 +51,13 @@ const CURRENT_BET_QUERY = `
   }
 `;
 
-export const useCurrentBetQuery = (
-  options?: OmitOptions<UseQueryOptions<CurrentBetQuery>>
+export const useCurrentBetQuery = <TData = CurrentBetQuery>(
+  options?: Omit<
+    UseQueryOptions<CurrentBetQuery, Error, TData>,
+    'queryKey' | 'queryFn'
+  >
 ) =>
-  useQuery<CurrentBetQuery>({
+  useQuery<CurrentBetQuery, Error, TData>({
     ...options,
     queryKey: ['currentBet'],
     queryFn: () => fetchData<CurrentBetQuery>(CURRENT_BET_QUERY),
