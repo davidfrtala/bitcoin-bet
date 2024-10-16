@@ -1,16 +1,31 @@
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { Header } from './components/Header';
+import { Content, Layout } from './components/Layout';
 
 function App() {
+  const { authStatus } = useAuthenticator((context) => [context.user]);
+
   return (
-    <Authenticator>
-      {({ signOut, user }) => (
-        <main>
-          <h1>Hello {user?.username}</h1>
-          <button onClick={signOut}>Sign out</button>
-        </main>
-      )}
-    </Authenticator>
+    <Layout>
+      <Header />
+      <Content>
+        <Routes>
+          <Route path="/" element={<div>Game</div>} />
+          <Route
+            path="/auth"
+            element={
+              authStatus === 'authenticated' ? (
+                <Navigate to="/" replace />
+              ) : (
+                <Authenticator />
+              )
+            }
+          />
+        </Routes>
+      </Content>
+    </Layout>
   );
 }
 

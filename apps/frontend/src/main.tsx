@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import App from './app/app';
 import { config } from './config';
+import { Authenticator } from '@aws-amplify/ui-react';
 
 Amplify.configure({
   Auth: {
@@ -30,8 +31,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <Authenticator.Provider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Authenticator.Provider>
   </StrictMode>
 );
