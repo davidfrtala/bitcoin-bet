@@ -40,12 +40,13 @@ export const usePlayerQuery = (
 const CURRENT_BET_QUERY = `
   query CurrentBet {
     currentBet {
-      betTimestamp
-      endPrice
       guess
-      priceDiff
       result
+      endPrice
       startPrice
+      priceDiff
+      waitTime
+      betTimestamp
     }
   }
 `;

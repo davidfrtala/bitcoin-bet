@@ -18,6 +18,7 @@ export type CurrentBet = {
   priceDiff: number | null;
   result: string | null;
   startPrice: number;
+  waitTime: number;
 };
 
 // Queries

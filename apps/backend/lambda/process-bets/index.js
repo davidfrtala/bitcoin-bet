@@ -7,7 +7,6 @@ const dynamoDBClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const sfnClient = new SFNClient({ region: process.env.AWS_REGION });
 
 const TableName = process.env.BETS_TABLE_NAME;
-const DEFAULT_WAIT_TIME_SECONDS = 60;
 
 exports.handler = async ({ Records }) => {
   for (const record of Records) {
@@ -44,6 +43,7 @@ exports.handler = async ({ Records }) => {
           Item: {
             userId,
             guess,
+            waitTime,
             betTimestamp: timestamp,
           },
         })
@@ -62,7 +62,7 @@ exports.handler = async ({ Records }) => {
       input: JSON.stringify({
         userId,
         guess,
-        wait: waitTime || DEFAULT_WAIT_TIME_SECONDS,
+        waitTime,
       }),
     });
 

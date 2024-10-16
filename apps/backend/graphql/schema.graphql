@@ -21,6 +21,7 @@ type Bet {
   endPrice: Float
   priceDiff: Float
   result: BetResult
+  waitTime: Int!
   betTimestamp: AWSTimestamp!
 }
 

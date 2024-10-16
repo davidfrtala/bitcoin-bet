@@ -1,6 +1,8 @@
-const { KinesisClient, PutRecordCommand } = require("@aws-sdk/client-kinesis");
+const { KinesisClient, PutRecordCommand } = require('@aws-sdk/client-kinesis');
 
 const kinesisClient = new KinesisClient({ region: process.env.AWS_REGION });
+
+const DEFAULT_WAIT_TIME_SECONDS = 60;
 
 exports.handler = async (event) => {
   const { identity, input } = event;
@@ -8,6 +10,7 @@ exports.handler = async (event) => {
   const bet = {
     userId: identity.sub,
     timestamp: Date.now(),
+    waitTime: input.waitTime || DEFAULT_WAIT_TIME_SECONDS,
     ...input,
   };
 
@@ -19,10 +22,10 @@ exports.handler = async (event) => {
   });
 
   try {
-    console.info("Putting record to Kinesis:", bet);
+    console.info('Putting record to Kinesis:', bet);
     await kinesisClient.send(command);
   } catch (error) {
-    console.error("Error putting record to Kinesis:", error);
-    throw new Error("Failed to place bet");
+    console.error('Error putting record to Kinesis:', error);
+    throw new Error('Failed to place bet');
   }
 };

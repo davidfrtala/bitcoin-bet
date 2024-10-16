@@ -280,7 +280,7 @@ export class BitcoinBetStack extends Stack {
     });
 
     const waitX = new sfn.Wait(this, `Wait X Seconds`, {
-      time: sfn.WaitTime.secondsPath('$.wait'),
+      time: sfn.WaitTime.secondsPath('$.waitTime'),
     });
 
     const readPlayerScore = new tasks.DynamoGetItem(this, 'Get player score', {
