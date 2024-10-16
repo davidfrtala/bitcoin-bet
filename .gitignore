@@ -65,3 +65,4 @@ temp/
 
 .nx/cache
 .nx/workspace-data
+dist
