@@ -6,4 +6,8 @@ export const config = {
   appsync: {
     URL: import.meta.env.VITE_APPSYNC_URL,
   },
+  posthog: {
+    key: import.meta.env.VITE_POSTHOG_KEY,
+    host: import.meta.env.VITE_POSTHOG_HOST,
+  },
 };

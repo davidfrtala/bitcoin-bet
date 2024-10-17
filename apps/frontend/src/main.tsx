@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { PostHogProvider } from 'posthog-js/react';
 import { Amplify } from 'aws-amplify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './app/app';
@@ -34,12 +35,20 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <Authenticator.Provider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </Authenticator.Provider>
-    </QueryClientProvider>
+    <PostHogProvider
+      apiKey={config.posthog.key}
+      options={{
+        api_host: config.posthog.host,
+        person_profiles: 'always',
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <Authenticator.Provider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Authenticator.Provider>
+      </QueryClientProvider>
+    </PostHogProvider>
   </StrictMode>
 );
