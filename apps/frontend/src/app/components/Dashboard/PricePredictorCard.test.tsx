@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCurrentBetQuery, usePlaceBetMutation } from '../../../api/queries';
+import { useLiveBtcPrice } from '../../../hooks/useLiveBtcPrice';
 import { useCountdown } from '../../../hooks/useCountdown';
 
 import { PricePredictorCard } from './PricePredictorCard';
 
 vi.mock('@aws-amplify/ui-react');
 vi.mock('../../../api/queries');
+vi.mock('../../../hooks/useLiveBtcPrice');
 vi.mock('../../../hooks/useCountdown');
 vi.mock('@tanstack/react-query', async () => {
   const actual = await vi.importActual('@tanstack/react-query');
@@ -36,6 +38,9 @@ describe('PricePredictorCard', () => {
   const mockUsePlaceBetMutation = usePlaceBetMutation as unknown as ReturnType<
     typeof vi.fn
   >;
+  const mockUseLiveBtcPrice = useLiveBtcPrice as unknown as ReturnType<
+    typeof vi.fn
+  >;
   const mockUseCountdown = useCountdown as unknown as ReturnType<typeof vi.fn>;
   const mockUseQueryClient = useQueryClient as unknown as ReturnType<
     typeof vi.fn
@@ -46,6 +51,7 @@ describe('PricePredictorCard', () => {
     mockUseAuthenticator.mockReturnValue({ authStatus: 'authenticated' });
     mockUseCurrentBetQuery.mockReturnValue({ data: { currentBet: null } });
     mockUsePlaceBetMutation.mockReturnValue({ mutate: vi.fn() });
+    mockUseLiveBtcPrice.mockReturnValue({ price: 30000 });
     mockUseCountdown.mockReturnValue({ countdown: 0 });
     mockUseQueryClient.mockReturnValue({
       setQueryData: vi.fn(),
@@ -57,6 +63,11 @@ describe('PricePredictorCard', () => {
   it('renders the Bitcoin Price Predictor title', () => {
     render(<PricePredictorCard />);
     expect(screen.getByText('Bitcoin Price Predictor')).toBeDefined();
+  });
+
+  it('displays the current BTC price', () => {
+    render(<PricePredictorCard />);
+    expect(screen.getByText('$30,000')).toBeDefined();
   });
 
   it('renders BettingControls when authenticated and not guessing', () => {
