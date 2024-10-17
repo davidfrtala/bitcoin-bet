@@ -1,18 +1,6 @@
-# AWS CDK AppSync DynamoDB Table Joining Demo
+# Simple Bitcoin Bet game
 
-<!--BEGIN STABILITY BANNER-->
-
-![Stability: Stable](https://img.shields.io/badge/stability-Stable-success.svg?style=for-the-badge)
-
-> **This is a stable example. It should successfully build out of the box**
->
-> This example is built on Construct Libraries marked "Stable" and does not have any infrastructure prerequisites to build.
-
----
-
-<!--END STABILITY BANNER-->
-
-This project demonstrates how to use AWS CDK (Cloud Development Kit) to create an AWS AppSync API backed by DynamoDB tables. The essence of this project lies in establishing a one-to-many relationship between two tables, where one table stores information about cars, and the other stores information about defects associated with cars. This allows querying both tables together as a sort of nested query.
+The main goal of this game is to allow players to predict whether the price of Bitcoin will go up or down within a specified time frame, earning or losing points based on the accuracy of their predictions.
 
 ## Table of Contents
 
@@ -20,13 +8,12 @@ This project demonstrates how to use AWS CDK (Cloud Development Kit) to create a
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Testing](#testing)
 - [Architecture](#architecture)
 
 ## Overview
 
-This project sets up an AWS AppSync API named `carAPI` with two DynamoDB tables: `cardata-cars` and `cardata-defects`. The `cardata-cars` table stores information about cars, while the `cardata-defects` table stores information about defects associated with cars. The AppSync API provides GraphQL endpoints to query and mutate data in these tables. The essence of this project is to enable querying both tables in a nested manner, representing the one-to-many relationship between cars and defects.
-
-The data used in this project is sourced from public data of RDW (Government agency Dienst Wegverkeer, commonly known as RDW, which handles the type-approval and registration of motorized vehicles and driving licences in the Netherlands). This data used in this project is based on data freely available for use without any restrictions.
+TODO
 
 ## Prerequisites
 
@@ -35,6 +22,7 @@ Before getting started, ensure you have the following prerequisites:
 - Node.js installed (v18.x)
 - AWS CDK installed (`npm install -g aws-cdk`)
 - AWS CLI configured with appropriate credentials
+  - run `cat ~/.aws/credentials` (unix) to see if you have profile configured
 
 ## Installation
 
@@ -47,51 +35,126 @@ Before getting started, ensure you have the following prerequisites:
 To deploy the AWS infrastructure, run the following command:
 
 ```bash
-cdk deploy
+npm run backend:deploy
 ```
 
 To remove the deployed infrastructure, run:
 
 ```bash
-cdk destroy
+npm run backend:destroy
 ```
 
-The data in the DynamoDB tables can be populated using the utilities provided in `utils/index.js`. It will take a couple of seconds to push all the data to DynamoDB. Execute the following command to populate the tables:
+To run the frontend SPA
 
 ```bash
-npm run push-data
+npm run frontend:serve
 ```
 
-Once the CDK stack is deployed and the data is ingested into the DynamoDB tables you can query it through the AWS Appsync Console. If you can go to the query tab you can execute the following GraphQL Request:
+## Testing
 
-```graphql
-query GetCar {
-  getCar(licenseplate: "BR794ZQ3") {
-    expirydateapk
-    cylindervolume
-    catalogprice
-    firstcolor
-    firstregistrationdate
-    licenseplate
-  }
-}
+You run the full test suite by
+
+```bash
+npm run test
+```
+
+Or individually
+
+```bash
+npm run backend:test
+npm run frontend:test
 ```
 
 ## Architecture
 
-![alt text](appsync-architecture.png)
+### Backend
 
-The AWS CDK stack defined in `cdk-appsync-demo-stack.ts` sets up the following resources:
+The AWS CDK stack defined in `apps/backend/stacks/bitcoin-bet-stack.ts` sets up the following resources:
 
 - DynamoDB tables:
-  - `cardata-cars`: Stores information about cars.
-- AppSync API (`carAPI`):
-  - GraphQL schema defined in `graphql/schema.graphql`.
-  - Data sources connected to DynamoDB tables.
-  - Resolvers to query data.
+  - `bitcoin-players`: Stores player information including userId, email, and score.
+  - `bitcoin-bets`: Stores bet information including userId, guess, prices, and results.
+- Cognito userPool: Manages user authentication and registration.
+- BetPlacementStream: Kinesis stream for processing bet placements.
+- AppSync API (`betsAPI`):
+  - GraphQL schema defined in `apps/backend/graphql/schema.graphql`.
+  - Data sources connected to DynamoDB tables and Lambda functions.
+  - Resolvers to query and mutate data.
 - Resolvers:
-  - `getCar.js`: Resolver function to fetch cars from the `cardata-cars` table.
+  - `currentBet.js`: Retrieves the current bet for a user.
+  - `placeBet.js`: Handles the placement of a new bet.
+  - `player.js`: Retrieves player information.
+- Lambdas:
+  - `PostSignupLambda`: Triggered after user confirmation to initialize player data.
+  - `IngestBetLambda`: Processes incoming bets and puts them into the Kinesis stream.
+  - `ProcessBetsLambda`: Processes bets from the Kinesis stream and initiates the resolution workflow.
+  - `CalculateResultLambda`: Calculates the result of a bet.
+- Step Functions state machine:
+  - Orchestrates the bet resolution process:
+    1. Fetches initial Bitcoin price
+    2. Waits for the specified duration
+    3. Fetches final Bitcoin price
+    4. Retrieves user bet and player information
+    5. Calculates bet result
+    6. Updates bet and player data in DynamoDB
+- IAM roles and policies: Ensure proper permissions for all components.
+- CloudWatch logs: Capture logs from Lambda functions and AppSync API.
 
-## Costs
+### Frontend
 
-The operational expenses associated with deploying this architecture are estimated to be approximately a couple of dollars per month (based on the eu-central-1 region). Cost optimization measures can be implemented by adjusting the write capacity of DynamoDB tables and indexes to a lower setting after the execution of the `npm run push-data` command.
+- ReactJS: A JavaScript library for building user interfaces
+- React Query: A powerful data synchronization library for React applications
+- TailwindCSS + ShadcnUI: Utility-first CSS framework with pre-built components
+- Vite: A fast build tool and development server
+
+The frontend architecture is structured as follows:
+
+1. **Main Application Entry**:
+
+   - The main entry point is defined in `src/main.tsx`, which sets up the React application with necessary providers.
+
+2. **Routing**:
+
+   - React Router is used for client-side routing, with routes defined in the `App` component.
+
+3. **Authentication**:
+
+   - AWS Amplify is used for authentication, configured in `src/main.tsx`.
+   - The `Auth` component (`src/app/components/Auth.tsx`) handles user authentication flow.
+
+4. **State Management**:
+
+   - React Query is used for server state management and data fetching.
+   - Custom hooks in `src/api/queries.ts` define queries and mutations for interacting with the backend.
+
+5. **Components**:
+
+   - The main dashboard is composed of several components:
+     - `ScoreCard`: Displays the user's current score
+     - `PricePredictorCard`: Main interface for making price predictions
+     - `BetDetailsCard`: Shows details of the user's current or last bet
+   - Reusable UI components are located in `src/app/components/shadcn-ui/`
+
+6. **API Communication**:
+
+   - The `src/api/api-client.ts` file contains the logic for making authenticated requests to the backend.
+
+7. **Custom Hooks**:
+
+   - `useLiveBtcPrice`: Manages WebSocket connection for real-time Bitcoin price updates
+   - `useCountdown`: Handles countdown logic for betting periods
+
+8. **Styling**:
+
+   - TailwindCSS is used for styling, with custom configurations in `tailwind.config.js`
+   - ShadcnUI components are integrated for consistent UI elements
+
+9. **Environment Configuration**:
+
+   - Environment variables are managed through Vite's env system, with types defined in `src/vite-env.d.ts`
+
+10. **Testing**:
+    - Unit tests are written using Vitest and React Testing Library
+    - Test files are co-located with their respective components
+
+This architecture promotes modularity, reusability, and maintainability while leveraging modern React patterns and libraries for efficient development and performance.
