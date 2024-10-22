@@ -28,7 +28,7 @@ exports.handler = async ({ Records }) => {
       // If a bet exists, check its timestamp
       if (existingBet.Item) {
         const timeSinceLastBet = timestamp - existingBet.Item.betTimestamp;
-        if (timeSinceLastBet < waitTime * 1000) {
+        if (timeSinceLastBet < existingBet.Item.waitTime * 1000) {
           console.warn(
             `Bet for user ${userId} filtered out due to ${waitTime}-second rule`
           );
