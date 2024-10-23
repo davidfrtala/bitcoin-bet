@@ -11,10 +11,6 @@ The main goal of this game is to allow players to predict whether the price of B
 - [Testing](#testing)
 - [Architecture](#architecture)
 
-## Overview
-
-TODO
-
 ## Prerequisites
 
 Before getting started, ensure you have the following prerequisites:
@@ -68,6 +64,8 @@ npm run frontend:test
 ## Architecture
 
 ### Backend
+
+![alt text](architecture.png)
 
 The AWS CDK stack defined in `apps/backend/stacks/bitcoin-bet-stack.ts` sets up the following resources:
 
