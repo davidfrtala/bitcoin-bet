@@ -2,6 +2,9 @@
 
 The main goal of this game is to allow players to predict whether the price of Bitcoin will go up or down within a specified time frame, earning or losing points based on the accuracy of their predictions.
 
+![Bitcoin Bet Game Preview](/btc-bet.png)
+
+
 ## Table of Contents
 
 - [Overview](#overview)
